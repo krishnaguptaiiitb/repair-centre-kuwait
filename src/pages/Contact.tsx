@@ -12,7 +12,6 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { COMPANY, SERVICES } from '@/lib/data';
-import { submitBooking } from '@/lib/supabase';
 import Reveal from '@/components/Reveal';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
@@ -34,27 +33,24 @@ export default function Contact() {
       setForm((f) => ({ ...f, [field]: e.target.value }));
     };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('submitting');
-    setErrorMsg('');
-    try {
-      await submitBooking(form);
-      setStatus('success');
-      setForm({
-        name: '',
-        phone: '',
-        service: SERVICES[0].title,
-        area: '',
-        message: '',
-      });
-    } catch (err) {
-      setStatus('error');
-      setErrorMsg(
-        err instanceof Error ? err.message : 'Something went wrong. Please try again.',
-      );
-    }
-  };
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  setErrorMsg('');
+
+  const message = [
+    'New Repair Request',
+    `Name: ${form.name}`,
+    `Phone: ${form.phone}`,
+    `Service: ${form.service}`,
+    `Area: ${form.area || 'Not provided'}`,
+    `Problem: ${form.message || 'Not provided'}`,
+  ].join('\n');
+
+  const whatsappUrl = `${COMPANY.whatsapp}${COMPANY.whatsapp.includes('?') ? '&' : '?'}text=${encodeURIComponent(message)}`;
+
+  window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  setStatus('success');
+};
 
   const inputCls =
     'w-full rounded-xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200';
